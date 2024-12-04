@@ -1,0 +1,37 @@
+# Ignore .git directory and other VCS-related files
+.git
+.gitignore
+
+# Ignore build outputs and temporary files
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Ignore IDE-specific settings
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore Dockerfile artifacts
+Dockerfile*
+.dockerignore
+
+# Ignore node_modules if you're using Node.js in any project subfolder
+node_modules/
+
+# Ignore environment files
+.env
+.env.*
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore unnecessary OS files
+*.DS_Store
+Thumbs.db
