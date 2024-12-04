@@ -16,7 +16,7 @@ RUN dotnet restore "eShop.Auth/eShop.Auth.csproj"
 COPY . .
 WORKDIR "/src/eShop.Auth"
 RUN dotnet build "eShop.Auth.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
+sds
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "eShop.Auth.csproj" -c $BUILD_CONFIGURATION -o /app/publish
