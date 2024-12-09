@@ -47,8 +47,12 @@ builder.Services.AddSwaggerGen(opt =>
     });
 });
 builder.Services.RegisterServices(builder.Configuration);
-var logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
+var logger = new LoggerConfiguration()
+    .ReadFrom
+    .Configuration(builder.Configuration).CreateLogger();
 builder.Logging.AddSerilog(logger, dispose: true);
+builder.Services.AddExceptionHandler<GlobalExceptionHandlerMiddleware>();
+builder.Services.AddProblemDetails();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -60,6 +64,7 @@ app.UseSwagger();
 
 app.UseSwaggerUI();
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseMiddleware<JwtMiddleware>();
 app.UseAuthentication();
