@@ -1,6 +1,5 @@
 using Common.Helpers;
 
-using eShop.Auth.Application.DTOs;
 using eShop.Auth.Application.DTOs.Request;
 using eShop.Auth.Application.DTOs.Response;
 using eShop.Auth.Application.Interfaces;
@@ -9,6 +8,8 @@ using eShop.Auth.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+
+using Serilog;
 
 namespace eShop.Auth.Controllers;
 
@@ -50,6 +51,7 @@ public class AuthController(IEShopAuthService eShopAuthService) : ControllerBase
         CancellationToken cancellationToken)
     {
         Result<IEnumerable<UserListDto>> response = await eShopAuthService.UserList(cancellationToken);
+        Log.Information("Information Retrieved @{response}", response.Data.Select(a => a.Email));
         return response.IsSuccess
             ? ApiResponseResult<List<UserListDto>>.Success(response.Data?.ToList(), response.Message)
             : ApiResponseResult<List<UserListDto>>.Problem<List<UserListDto>>(response.Error);

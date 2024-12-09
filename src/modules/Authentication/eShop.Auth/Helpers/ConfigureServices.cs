@@ -1,5 +1,6 @@
 using System.Reflection;
 
+using eShop.Auth.Application;
 using eShop.Auth.Application.Helpers;
 using eShop.Auth.Infrastructure;
 
@@ -12,8 +13,8 @@ public static class ConfigureServices
     {
         var assemblies = new[]
         {
-            typeof(eShop.Auth.Application.IEShopAuthApplicationAssemblyMarker).Assembly,
-            typeof(eShop.Auth.Infrastructure.IEShopAuthInfraAssemblyMarker).Assembly,
+            typeof(IEShopAuthApplicationAssemblyMarker).Assembly,
+            typeof(IEShopAuthInfraAssemblyMarker).Assembly,
         };
         // Scan assemblies for types implementing InjectServices
         var injectServiceTypes = assemblies
