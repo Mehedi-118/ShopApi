@@ -10,6 +10,7 @@ namespace eShop.Auth.Infrastructure.Repositories;
 
 public class UnitOfWork(
     AuthenticationDbContext dbContext,
+    AuthenticationReadOnlyDbContext readOnlyDbContext,
     UserManager<User> userManager,
     IEShopAuthRepository eShopAuthRepository)
     : IUnitOfWork
@@ -18,9 +19,9 @@ public class UnitOfWork(
 
 
     public IEShopAuthRepository EShopAuthRepository =>
-        _eShopAuthRepository ??= new EShopRepository(dbContext, userManager);
+        _eShopAuthRepository ??= new EShopRepository(dbContext, readOnlyDbContext, userManager);
 
-   
+
     public async Task<Result<CommitResult>> SaveChangesAsync(CancellationToken cancellationToken)
     {
         try

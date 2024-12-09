@@ -13,6 +13,7 @@ namespace eShop.Auth.Infrastructure.Repositories;
 
 public class EShopRepository(
     AuthenticationDbContext dbContext,
+    AuthenticationReadOnlyDbContext readOnlyDbContext,
     UserManager<User> userManager)
     : IEShopAuthRepository
 {
