@@ -16,7 +16,7 @@ public partial class User : IdentityUser<long>, ICreationMetadata, IModification
     public DateTime CreatedAt { get; init; } = DateTime.Now;
     public long? UpdatedBy { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    public DateTime? LastLogin { get; init; }
+    public DateTime? LastLogin { get; set; }
     public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; }
 

@@ -7,6 +7,10 @@ namespace eShop.Auth.Application.Interfaces;
 
 public interface IJwtService
 {
-    Task<Result<UserToken>>GenerateToken(UserTokenGeneratorDto entity, CancellationToken cancellationToken);
+    Task<Result<UserTokenResponse>> GenerateToken(UserTokenGeneratorDto entity, CancellationToken cancellationToken);
+
+    Task<Result<UserTokenGeneratorDto>> GetPrincipalFromExpiredToken(string accessToken,
+        CancellationToken cancellationToken);
+
     Task<string> GenerateRefreashToken();
 }

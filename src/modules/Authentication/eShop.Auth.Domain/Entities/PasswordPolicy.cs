@@ -4,6 +4,8 @@ namespace eShop.Auth.Domain.Entities;
 
 public class PasswordPolicy
 {
+    
+    public int Id { get; set; }
     public int MinLength { get; set; }
     public bool RequireUppercase { get; set; } = true;
     public bool RequireLowercase { get; set; } = true;

@@ -1,14 +1,10 @@
 using Common.Helpers;
 
-using eShop.Auth.Application.DTOs;
 using eShop.Auth.Application.DTOs.Request;
 using eShop.Auth.Application.DTOs.Response;
-using eShop.Auth.Application.Helpers;
 using eShop.Auth.Application.UserCase.Interfaces;
 using eShop.Auth.Domain.Entities;
 using eShop.Auth.Domain.Interfaces;
-
-using Microsoft.Extensions.Options;
 
 namespace eShop.Auth.Application.UserCase.Implementation;
 
@@ -38,6 +34,7 @@ public class UserUseCase(IUnitOfWork unitOfWork)
             return Result<UserRegisterResponseDto>.Failure(Error.ValidationError(user.ValidationErrors));
         }
 
+
         Result<User> result = await unitOfWork.EShopAuthRepository.Register(user, cancellationToken);
         var userRegisterResponseDto =
             new UserRegisterResponseDto { UserName = userRegisterDto.UserName, Email = userRegisterDto.Email };
@@ -60,7 +57,7 @@ public class UserUseCase(IUnitOfWork unitOfWork)
         User user = User.CreateBuilder()
             .WithLogInCredential(userLoginDto.UserName.Trim(), userLoginDto.Password)
             .Build();
-        if (user.ValidationErrors?.Count > 0)
+        if (user.ValidationErrors.Count > 0)
         {
             return Result<UserLoginResponseDto>.Failure(Error.ValidationError(user.ValidationErrors));
         }
@@ -106,5 +103,64 @@ public class UserUseCase(IUnitOfWork unitOfWork)
         }
 
         return Result<IEnumerable<UserListDto>>.Success(userListDto);
+    }
+
+    public async Task<Result<bool>> StoreRefreashToken(RefreashTokenDto requestDto, CancellationToken cancellationToken)
+    {
+        var entity = RefreashToken.CreateBuilder()
+            .WithRefreshToken(requestDto.RefreshToken)
+            .WithUserId(requestDto.UserId)
+            .WithExpiresOnUtc(requestDto.ExpiresOnUtc)
+            .WithIsRevoked(requestDto.IsRevoked)
+            .WithCreatedBy(requestDto.CreatedBy)
+            .WithCreatedAt(requestDto.CreatedAt)
+            .WithPreviousRefreashToken(requestDto.PreviousRefreshToken)
+            .Build();
+
+
+        Result<bool> result = await unitOfWork.EShopAuthRepository.StoreRefreashToken(entity, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return Result<bool>.Failure(result.Error, result.Message);
+        }
+
+        var commitResult = await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return commitResult.IsSuccess is not true
+            ? Result<bool>.Failure(commitResult.Error, commitResult.Message)
+            : Result<bool>.Success(true, "Refreash Token stored successfully");
+    }
+
+    public async Task<Result<UserLoginResponseDto>> ValidateRefreashToken(string refreshToken,
+        CancellationToken cancellationToken)
+    {
+        var getUserByRefreashToken =
+            await unitOfWork.EShopAuthRepository.GetUserByRefreashToken(refreshToken, cancellationToken);
+        if (getUserByRefreashToken is not { IsSuccess: true, Data: not null })
+        {
+            return Result<UserLoginResponseDto>.Failure(getUserByRefreashToken.Error, getUserByRefreashToken.Message);
+        }
+
+        return Result<UserLoginResponseDto>.Success(
+            new UserLoginResponseDto
+            {
+                UserId = getUserByRefreashToken.Data?.Id ?? 0,
+                UserName = getUserByRefreashToken.Data?.UserName ?? string.Empty,
+                Email = getUserByRefreashToken.Data?.Email ?? string.Empty,
+            }, "User Retrieved Successfully");
+    }
+    public async Task<Result<bool>> RevokeToken(long userId,
+        CancellationToken cancellationToken)
+    {
+        var revokeTokenStatus = await unitOfWork.EShopAuthRepository.RevokeToken(userId, cancellationToken);
+        if (revokeTokenStatus is not { IsSuccess: true })
+        {
+            return Result<bool>.Failure(revokeTokenStatus.Error, revokeTokenStatus.Message);
+        }
+
+        var commitResult = await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return commitResult.IsSuccess is not true
+            ? Result<bool>.Failure(commitResult.Error, commitResult.Message)
+            : Result<bool>.Success(true, "Refreash Token revokation successful");
     }
 }

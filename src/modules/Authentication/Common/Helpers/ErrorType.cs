@@ -12,6 +12,20 @@ public enum ErrorType
     DbError,
     Exception,
     InternalServerError,
-    ValidationError
+    ValidationError,
+    Conflict,
+    NoContent,
+    UnsupportedMediaType,
+    MethodNotAllowed,
+    NotAcceptable,
+    RequestTimeout,
+    LengthRequired,
+    TooManyRequests,
+    NotImplemented,
+    BadGateway,
+    ServiceUnavailable,
+    HttpVersionNotSupported,
+    InsufficientStorage,
+    
 }
 

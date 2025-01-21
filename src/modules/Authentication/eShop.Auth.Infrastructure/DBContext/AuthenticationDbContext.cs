@@ -7,12 +7,15 @@ using Microsoft.EntityFrameworkCore;
 namespace eShop.Auth.Infrastructure.DBContext;
 
 public class AuthenticationDbContext(DbContextOptions<AuthenticationDbContext> options)
-    :   IdentityDbContext<User, Role, long, 
-        IdentityUserClaim<long>, UserRole, 
+    : IdentityDbContext<User, Role, long,
+        IdentityUserClaim<long>, UserRole,
         IdentityUserLogin<long>,
-        IdentityRoleClaim<long>, 
+        IdentityRoleClaim<long>,
         IdentityUserToken<long>>(options)
 {
+    public DbSet<RefreashToken> RefreashTokens { get; set; }
+    public DbSet<PasswordPolicy> PasswordPolicySet { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

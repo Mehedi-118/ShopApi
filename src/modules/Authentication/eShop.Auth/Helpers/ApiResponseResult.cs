@@ -32,7 +32,29 @@ public class ApiResponseResult<T> where T : class
     {
         return TypedResults.Json(new ApiResponse<T>(
             message: error.Description,
-            statusCode: error.StatusCode,
+            statusCode: error.ErrorType switch
+            {
+                ErrorType.NotFound => HttpStatusCode.NotFound,
+                ErrorType.ValidationError => HttpStatusCode.BadRequest,
+                ErrorType.Unauthorized => HttpStatusCode.Unauthorized,
+                ErrorType.Forbidden => HttpStatusCode.Forbidden,
+                ErrorType.BadRequest => HttpStatusCode.BadRequest,
+                ErrorType.UnprocessableEntity => HttpStatusCode.UnprocessableEntity,
+                ErrorType.Conflict => HttpStatusCode.Conflict,
+                ErrorType.NoContent => HttpStatusCode.NoContent,
+                ErrorType.UnsupportedMediaType => HttpStatusCode.UnsupportedMediaType,
+                ErrorType.MethodNotAllowed => HttpStatusCode.MethodNotAllowed,
+                ErrorType.NotAcceptable => HttpStatusCode.NotAcceptable,
+                ErrorType.RequestTimeout => HttpStatusCode.RequestTimeout,
+                ErrorType.LengthRequired => HttpStatusCode.LengthRequired,
+                ErrorType.TooManyRequests => HttpStatusCode.TooManyRequests,
+                ErrorType.NotImplemented => HttpStatusCode.NotImplemented,
+                ErrorType.BadGateway => HttpStatusCode.BadGateway,
+                ErrorType.ServiceUnavailable => HttpStatusCode.ServiceUnavailable,
+                ErrorType.HttpVersionNotSupported => HttpStatusCode.HttpVersionNotSupported,
+                ErrorType.InsufficientStorage => HttpStatusCode.InsufficientStorage,
+                _ => HttpStatusCode.InternalServerError
+            },
             success: false,
             errors: error.ErrorList ?? new Dictionary<string, List<string>>(),
             data: data

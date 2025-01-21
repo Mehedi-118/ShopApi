@@ -7,7 +7,7 @@ public class UserLoginResponseDto
     public string PhoneNumber { get; set; } = String.Empty;
     
     public string Email { get; set; } = String.Empty;
-    public UserToken? UserToken { get; set; } = default;
+    public UserTokenResponse? UserToken { get; set; } = default;
     public string[] Roles { get; set; }
     public string[] Permissions { get; set; }
     public string[] Claims { get; set; }

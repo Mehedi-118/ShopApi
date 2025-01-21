@@ -22,6 +22,7 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
     public async Task<Result<UserLoginResponseDto>> Login(UserLoginDto userLoginDto,
         CancellationToken cancellationToken)
     {
+        // Login Operation
         Result<UserLoginResponseDto> result =
             await userUseCase.LoginHandler(userLoginDto, cancellationToken);
         if (result is not { IsSuccess: true, Data: not null })
@@ -29,6 +30,7 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
             return !result.IsSuccess ? Result<UserLoginResponseDto>.Failure(result.Error) : result;
         }
 
+        // Token Generation
         UserTokenGeneratorDto userTokenGeneratorDto = new UserTokenGeneratorDto
         {
             UserId = result.Data.UserId,
@@ -41,14 +43,87 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
         {
             return Result<UserLoginResponseDto>.Failure(Error.Failure(description: "Failed to generate token"));
         }
+        // Insert Refreash Token Generation in DB
+
+        var refreashTokenObj = new RefreashTokenDto
+        {
+            RefreshToken = userTokenResult.Data.RefreshToken,
+            UserId = userTokenGeneratorDto.UserId,
+            ExpiresOnUtc = userTokenResult.Data.RefreashTokenExpiresOn,
+            IsRevoked = false,
+            CreatedBy = userTokenGeneratorDto.UserId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var storeRefreashToken =
+            await userUseCase.StoreRefreashToken(refreashTokenObj, cancellationToken: cancellationToken);
+
+        if (!storeRefreashToken.IsSuccess)
+        {
+            return Result<UserLoginResponseDto>.Failure(
+                Error.Failure(description: "Failed to store refreash token in db"));
+        }
 
         result.Data.UserToken = userTokenResult.Data;
         return result;
+    }
+
+    public async Task<Result<UserTokenResponse>> RefreashToken(UserTokenResponse userTokenResponseDto,
+        CancellationToken cancellationToken)
+    {
+        // Get User By Refreash Token upon validating the refreash token
+        var validateRefreashToken = await userUseCase.ValidateRefreashToken(userTokenResponseDto.RefreshToken,
+            cancellationToken);
+
+        if (validateRefreashToken is not { IsSuccess: true, Data: not null })
+        {
+            return Result<UserTokenResponse>.Failure(validateRefreashToken.Error);
+        }
+
+        var userTokenGeneratorDto = new UserTokenGeneratorDto
+        {
+            UserId = validateRefreashToken?.Data?.UserId ?? 0,
+            Username = validateRefreashToken?.Data?.UserName ?? string.Empty,
+            Email = validateRefreashToken?.Data?.Email ?? string.Empty,
+        };
+        var newTokenResult = await jwtService.GenerateToken(userTokenGeneratorDto, cancellationToken);
+
+        var refreashTokenObj = new RefreashTokenDto
+        {
+            RefreshToken = newTokenResult.Data.RefreshToken,
+            PreviousRefreshToken = userTokenResponseDto.RefreshToken,
+            UserId = validateRefreashToken.Data.UserId,
+            ExpiresOnUtc = newTokenResult.Data.RefreashTokenExpiresOn,
+            IsRevoked = false,
+            CreatedBy = validateRefreashToken.Data.UserId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var storeRefreashToken =
+            await userUseCase.StoreRefreashToken(refreashTokenObj, cancellationToken: cancellationToken);
+
+        if (!storeRefreashToken.IsSuccess)
+        {
+            return Result<UserTokenResponse>.Failure(
+                Error.Failure(description: "Failed to generate refreash token"));
+        }
+
+
+        return !newTokenResult.IsSuccess
+            ? Result<UserTokenResponse>.Failure(Error.Failure(description: "Failed to generate token"))
+            : newTokenResult;
     }
 
     public async Task<Result<IEnumerable<UserListDto>>> UserList(CancellationToken cancellationToken)
     {
         Result<IEnumerable<UserListDto>> result = await userUseCase.UserList(cancellationToken);
         return !result.IsSuccess ? Result<IEnumerable<UserListDto>>.Failure(result.Error) : result;
+    }
+
+    public async Task<Result<bool>> RevokeToken(long userId, CancellationToken cancellationToken)
+    {
+        var result = await userUseCase.RevokeToken(userId, cancellationToken);
+        if (result.IsSuccess) { }
+
     }
 }

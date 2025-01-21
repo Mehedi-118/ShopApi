@@ -44,6 +44,19 @@ public class AuthController(IEShopAuthService eShopAuthService) : ControllerBase
             : ApiResponseResult<UserLoginResponseDto>.Problem<UserLoginResponseDto>(response.Error);
     }
 
+    [HttpPost]
+    [AllowAnonymous]
+    [Route("refresh-token")]
+    public async
+        Task<Results<Ok<ApiResponse<UserTokenResponse>>, JsonHttpResult<ApiResponse<UserTokenResponse>>>>
+        RefreashToken([FromBody] UserTokenResponse userTokenResponse, CancellationToken cancellationToken)
+    {
+        Result<UserTokenResponse> response = await eShopAuthService.RefreashToken(userTokenResponse, cancellationToken);
+        return response.IsSuccess
+            ? ApiResponseResult<UserTokenResponse>.Success(response.Data, response.Message)
+            : ApiResponseResult<UserTokenResponse>.Problem<UserTokenResponse>(response.Error);
+    }
+
     [HttpGet]
     [Route("user-list")]
     public async Task<Results<Ok<ApiResponse<List<UserListDto>>>,
@@ -55,4 +68,13 @@ public class AuthController(IEShopAuthService eShopAuthService) : ControllerBase
             ? ApiResponseResult<List<UserListDto>>.Success(response.Data?.ToList(), response.Message)
             : ApiResponseResult<List<UserListDto>>.Problem<List<UserListDto>>(response.Error);
     }
+
+    [HttpPost]
+    [Route("revoke-token")]
+
+    public async Task<Results<Ok<ApiResponse<bool>>, JsonHttpResult<ApiResponse<bool>>>> RevokeToken([FromBody] long userId, CancellationToken cancellationToken)
+    {
+        var response = await eShopAuthService.RevokeToken(userId,cancellationToken);
+    }
+
 }

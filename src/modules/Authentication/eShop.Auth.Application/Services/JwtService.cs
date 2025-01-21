@@ -19,7 +19,7 @@ public class JwtService(IOptions<JwtOptions> options) : IJwtService
 {
     private readonly JwtOptions _jwtOptions = options.Value;
 
-    public async Task<Result<UserToken>> GenerateToken(UserTokenGeneratorDto entity,
+    public async Task<Result<UserTokenResponse>> GenerateToken(UserTokenGeneratorDto entity,
         CancellationToken cancellationToken)
     {
         try
@@ -44,27 +44,73 @@ public class JwtService(IOptions<JwtOptions> options) : IJwtService
             var result = new JwtSecurityTokenHandler().WriteToken(token);
             if (result is null)
             {
-                return Result<UserToken>.Failure(Error.Failure(description: "Failed to generate token"));
+                return Result<UserTokenResponse>.Failure(Error.Failure(description: "Failed to generate token"));
             }
 
             var refreashToken = await GenerateRefreashToken();
             if (string.IsNullOrWhiteSpace(refreashToken))
             {
-                return Result<UserToken>.Failure(Error.Failure(description: "Failed to generate refreash token"));
+                return Result<UserTokenResponse>.Failure(Error.Failure(description: "Failed to generate refreash token"));
             }
 
-            UserToken userTokenObj = new UserToken
+            UserTokenResponse userTokenResponseObj = new UserTokenResponse
             {
                 AccessToken = result,
                 RefreshToken = refreashToken,
-                TokenExpiresIn = DateTime.Now.AddMinutes(_jwtOptions.ExpiryMinutes),
-                RefreashTokenExpiresIn = DateTime.Now.AddMinutes(_jwtOptions.RefreshExpiryMinutes)
+                TokenExpiresOn = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes),
+                RefreashTokenExpiresOn = DateTime.UtcNow.AddMinutes(_jwtOptions.RefreshExpiryMinutes)
             };
-            return Result<UserToken>.Success(userTokenObj);
+            return Result<UserTokenResponse>.Success(userTokenResponseObj);
         }
         catch (Exception e)
         {
-            return Result<UserToken>.Failure(Error.Failure());
+            return Result<UserTokenResponse>.Failure(Error.Failure());
+        }
+    }
+
+    public async Task<Result<UserTokenGeneratorDto>> GetPrincipalFromExpiredToken(string accessToken,
+        CancellationToken cancellationToken)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap["email"] = JwtRegisteredClaimNames.Email;
+        var key = Encoding.ASCII.GetBytes(_jwtOptions.SigningCredentials);
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = false,
+            ClockSkew = TimeSpan.Zero
+        };
+        try
+        {
+            var principal = tokenHandler.ValidateToken(accessToken, tokenValidationParameters, out var securityToken);
+            if (principal is null || principal.Identity?.IsAuthenticated is false)
+            {
+                return await Task.FromResult(
+                    Result<UserTokenGeneratorDto>.Failure(
+                        Error.Failure(description: "Failed to get principal from token")));
+            }
+
+            return principal.Claims.Any()
+                ? Result<UserTokenGeneratorDto>.Success(new UserTokenGeneratorDto
+                {
+                    UserId = Convert.ToUInt32(principal.Claims?
+                        .FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sid)?.Value),
+                    Username =
+                        principal.Claims?.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Name)?.Value,
+                    Email = principal.Claims?.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Email)?.Value
+                })
+                : Result<UserTokenGeneratorDto>.Failure(
+                    Error.Failure(description: "Failed to get principal from token"));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return Result<UserTokenGeneratorDto>.Failure(
+                Error.Failure(description: "Failed to get principal from token", errorType: ErrorType.Unauthorized));
         }
     }
 
@@ -81,4 +127,6 @@ public class JwtService(IOptions<JwtOptions> options) : IJwtService
 
         return Task.FromResult(refreashToken ?? string.Empty);
     }
+
+
 }

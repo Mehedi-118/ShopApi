@@ -15,4 +15,8 @@ public interface IUserUseCase
         CancellationToken cancellationToken);
 
     Task<Result<IEnumerable<UserListDto>>> UserList(CancellationToken cancellationToken);
+    Task<Result<bool>> StoreRefreashToken(RefreashTokenDto entity, CancellationToken cancellationToken);
+    Task<Result<bool>> RevokeToken(long userId, CancellationToken cancellationToken);
+
+    Task<Result<UserLoginResponseDto>> ValidateRefreashToken(string refreshToken, CancellationToken cancellationToken);
 }
