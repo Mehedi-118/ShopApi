@@ -4,7 +4,7 @@ namespace Common.Helpers;
 
 public class Result<T>
 {
-    public T? Data { get; } = default;
+    public T? Data { get; }
     public bool IsSuccess { get; }
     public string Message { get; } = string.Empty;
     public readonly Error Error;
@@ -13,6 +13,11 @@ public class Result<T>
     private Result(T data, bool isSuccess, string message)
     {
         Data = data;
+        IsSuccess = isSuccess;
+        Message = message;
+    }
+    private Result(bool isSuccess, string message)
+    {
         IsSuccess = isSuccess;
         Message = message;
     }
@@ -31,9 +36,13 @@ public class Result<T>
         IsSuccess = false;
     }
 
-    public static Result<T> Success(T? data = default, string message = "Success")
+    public static Result<T> Success(T? data, string message = "Success")
     {
         return new Result<T>(data: data, isSuccess: true, message: message);
+    }
+    public static Result<T> Success(string message = "Success")
+    {
+        return new Result<T>(isSuccess: true, message: message);
     }
 
     public static Result<T> Failure(Error error, string message = "Failure", T? data = default)

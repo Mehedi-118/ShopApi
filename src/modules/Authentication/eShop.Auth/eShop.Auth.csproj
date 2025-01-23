@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>WinExe</OutputType>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -47,7 +47,7 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
 
         var refreashTokenObj = new RefreashTokenDto
         {
-            RefreshToken = userTokenResult.Data.RefreshToken,
+            RefreshToken = userTokenResult.Data.RefreashToken,
             UserId = userTokenGeneratorDto.UserId,
             ExpiresOnUtc = userTokenResult.Data.RefreashTokenExpiresOn,
             IsRevoked = false,
@@ -68,11 +68,11 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
         return result;
     }
 
-    public async Task<Result<UserTokenResponse>> RefreashToken(UserTokenResponse userTokenResponseDto,
+    public async Task<Result<UserTokenResponse>> RefreashToken(UserTokenRequest userTokenRequestDto,
         CancellationToken cancellationToken)
     {
         // Get User By Refreash Token upon validating the refreash token
-        var validateRefreashToken = await userUseCase.ValidateRefreashToken(userTokenResponseDto.RefreshToken,
+        var validateRefreashToken = await userUseCase.ValidateRefreashToken(userTokenRequestDto.RefreashToken,
             cancellationToken);
 
         if (validateRefreashToken is not { IsSuccess: true, Data: not null })
@@ -90,8 +90,8 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
 
         var refreashTokenObj = new RefreashTokenDto
         {
-            RefreshToken = newTokenResult.Data.RefreshToken,
-            PreviousRefreshToken = userTokenResponseDto.RefreshToken,
+            RefreshToken = newTokenResult.Data.RefreashToken,
+            PreviousRefreshToken = userTokenRequestDto.RefreashToken,
             UserId = validateRefreashToken.Data.UserId,
             ExpiresOnUtc = newTokenResult.Data.RefreashTokenExpiresOn,
             IsRevoked = false,
@@ -121,9 +121,14 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
     }
 
     public async Task<Result<bool>> RevokeToken(long userId, CancellationToken cancellationToken)
-    {
+    {      
         var result = await userUseCase.RevokeToken(userId, cancellationToken);
-        if (result.IsSuccess) { }
+        if (!result.IsSuccess)
+        {
+
+            return result;
+        }
+        return result;
 
     }
 }

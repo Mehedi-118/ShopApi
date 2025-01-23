@@ -44,9 +44,8 @@ public class UserUseCase(IUnitOfWork unitOfWork)
             return Result<UserRegisterResponseDto>.Failure(result.Error, result.Message);
         }
 
-        Result<CommitResult> commitResult = await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return commitResult.IsSuccess
+        return result.IsSuccess
             ? Result<UserRegisterResponseDto>.Success(userRegisterResponseDto, result.Message)
             : Result<UserRegisterResponseDto>.Failure(result.Error);
     }
@@ -151,6 +150,11 @@ public class UserUseCase(IUnitOfWork unitOfWork)
     public async Task<Result<bool>> RevokeToken(long userId,
         CancellationToken cancellationToken)
     {
+        if (userId == 0)
+        {
+            return Result<bool>.Failure(Error.ValidationError(new Dictionary<string, List<string>> { { "user Id", new List<string> { "User Id Cannot be 0" } } }));
+
+        }
         var revokeTokenStatus = await unitOfWork.EShopAuthRepository.RevokeToken(userId, cancellationToken);
         if (revokeTokenStatus is not { IsSuccess: true })
         {

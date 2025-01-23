@@ -22,8 +22,7 @@ public class EShopRepository(
         {
             IdentityResult result = await userManager.CreateAsync(entity, entity.PasswordHash!);
             return !result.Succeeded
-                ? Result<User>.Failure(Error.DatabaseError(nameof(User),
-                    result.Errors.Select(a => a.Description).ToList()))
+                ? Result<User>.Failure(Error.DatabaseError(nameof(User),result.Errors.Select(a => a.Description).ToList()))
                 : Result<User>.Success(entity, "User registered successfully");
         }
         catch (Exception e)

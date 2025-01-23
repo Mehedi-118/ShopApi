@@ -13,7 +13,16 @@ public class ApiResponseResult<T> where T : class
     public static Ok<ApiResponse<T>> Success(T? data, string message = "Success")
     {
         return TypedResults.Ok(new ApiResponse<T>(
-            data: data,
+            data: data ?? null,
+            message: message,
+            statusCode: HttpStatusCode.OK,
+            success: true,
+            errors: new Dictionary<string, List<string>>()
+        ));
+    }
+    public static Ok<ApiResponse<T>> Success(string message = "Success")
+    {
+        return TypedResults.Ok(new ApiResponse<T>(
             message: message,
             statusCode: HttpStatusCode.OK,
             success: true,

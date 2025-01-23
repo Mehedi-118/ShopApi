@@ -56,7 +56,7 @@ public class JwtService(IOptions<JwtOptions> options) : IJwtService
             UserTokenResponse userTokenResponseObj = new UserTokenResponse
             {
                 AccessToken = result,
-                RefreshToken = refreashToken,
+                RefreashToken = refreashToken,
                 TokenExpiresOn = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes),
                 RefreashTokenExpiresOn = DateTime.UtcNow.AddMinutes(_jwtOptions.RefreshExpiryMinutes)
             };

@@ -49,7 +49,7 @@ public class AuthController(IEShopAuthService eShopAuthService) : ControllerBase
     [Route("refresh-token")]
     public async
         Task<Results<Ok<ApiResponse<UserTokenResponse>>, JsonHttpResult<ApiResponse<UserTokenResponse>>>>
-        RefreashToken([FromBody] UserTokenResponse userTokenResponse, CancellationToken cancellationToken)
+        RefreashToken([FromBody] UserTokenRequest userTokenResponse, CancellationToken cancellationToken)
     {
         Result<UserTokenResponse> response = await eShopAuthService.RefreashToken(userTokenResponse, cancellationToken);
         return response.IsSuccess
@@ -72,9 +72,15 @@ public class AuthController(IEShopAuthService eShopAuthService) : ControllerBase
     [HttpPost]
     [Route("revoke-token")]
 
-    public async Task<Results<Ok<ApiResponse<bool>>, JsonHttpResult<ApiResponse<bool>>>> RevokeToken([FromBody] long userId, CancellationToken cancellationToken)
+    public async Task<Results<Ok<ApiResponse<EmptyResponse>>, JsonHttpResult<ApiResponse<EmptyResponse>>>> RevokeToken(long userId, CancellationToken cancellationToken)
     {
-        var response = await eShopAuthService.RevokeToken(userId,cancellationToken);
+        var response = await eShopAuthService.RevokeToken(userId, cancellationToken);
+        if (!response.IsSuccess)
+        {
+            return ApiResponseResult<Result<EmptyResponse>>.Problem<EmptyResponse>(response.Error);
+        }
+        Ok<ApiResponse<EmptyResponse>> apiResponse = ApiResponseResult<EmptyResponse>.Success(message: "Token revoked successfully.");
+        return apiResponse;
     }
 
 }
