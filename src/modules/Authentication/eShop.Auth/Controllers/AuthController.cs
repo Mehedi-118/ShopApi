@@ -82,5 +82,18 @@ public class AuthController(IEShopAuthService eShopAuthService) : ControllerBase
         Ok<ApiResponse<EmptyResponse>> apiResponse = ApiResponseResult<EmptyResponse>.Success(message: "Token revoked successfully.");
         return apiResponse;
     }
+    [HttpPost]
+    [Route("role")]
+
+    public async Task<Results<Ok<ApiResponse<UserRoleDto>>, JsonHttpResult<ApiResponse<UserRoleDto>>>> CreateRole([FromBody] UserRoleDto userRoleDto, CancellationToken cancellationToken)
+    {
+        var response = await eShopAuthService.CreateRole(userRoleDto, cancellationToken);
+        if (!response.IsSuccess)
+        {
+            return ApiResponseResult<Result<UserRoleDto>>.Problem<UserRoleDto>(response.Error);
+        }
+        Ok<ApiResponse<UserRoleDto>> apiResponse = ApiResponseResult<UserRoleDto>.Success(response.Data, response.Message);
+        return apiResponse;
+    }
 
 }

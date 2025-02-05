@@ -8,15 +8,14 @@ namespace eShop.Auth.Application.Interfaces;
 
 public interface IEShopAuthService
 {
-    Task<Result<UserRegisterResponseDto>>
-        Register(UserRegisterDto userRegisterDto, CancellationToken cancellationToken);
+    Task<Result<UserRegisterResponseDto>> Register(UserRegisterDto userRegisterDto, CancellationToken cancellationToken);
 
-    Task<Result<UserLoginResponseDto>>
-        Login(UserLoginDto userLoginDto, CancellationToken cancellationToken);
+    Task<Result<UserLoginResponseDto>> Login(UserLoginDto userLoginDto, CancellationToken cancellationToken);
 
-    Task<Result<UserTokenResponse>>
-        RefreashToken(UserTokenRequest userLoginDto, CancellationToken cancellationToken);
+    Task<Result<UserTokenResponse>> RefreashToken(UserTokenRequest userLoginDto, CancellationToken cancellationToken);
+
+    Task<Result<UserRoleDto>> CreateRole(UserRoleDto userRoleDto, CancellationToken cancellationToken);
 
     Task<Result<IEnumerable<UserListDto>>> UserList(CancellationToken cancellationToken);
-    Task<Result<bool>> RevokeToken(long userId,CancellationToken cancellationToken);
+    Task<Result<bool>> RevokeToken(long userId, CancellationToken cancellationToken);
 }

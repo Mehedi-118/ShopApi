@@ -13,7 +13,8 @@ namespace eShop.Auth.Infrastructure.Repositories;
 public class EShopRepository(
     AuthenticationDbContext dbContext,
     AuthenticationReadOnlyDbContext readOnlyDbContext,
-    UserManager<User> userManager)
+    UserManager<User> userManager,
+    RoleManager<Role> roleManager)
     : IEShopAuthRepository
 {
     public async Task<Result<User>> Register(User entity, CancellationToken cancellationToken)
@@ -22,12 +23,26 @@ public class EShopRepository(
         {
             IdentityResult result = await userManager.CreateAsync(entity, entity.PasswordHash!);
             return !result.Succeeded
-                ? Result<User>.Failure(Error.DatabaseError(nameof(User),result.Errors.Select(a => a.Description).ToList()))
+                ? Result<User>.Failure(Error.DatabaseError(nameof(User), result.Errors.Select(a => a.Description).ToList()))
                 : Result<User>.Success(entity, "User registered successfully");
         }
         catch (Exception e)
         {
             return Result<User>.Failure(Error.ExceptionError());
+        }
+    }
+    public async Task<Result<Role>> CreateRole(Role entity, CancellationToken cancellationToken)
+    {
+        try
+        {
+            IdentityResult result = await roleManager.CreateAsync(entity);
+            return !result.Succeeded
+                ? Result<Role>.Failure(Error.DatabaseError(nameof(Role), result.Errors.Select(a => a.Description).ToList()))
+                : Result<Role>.Success(entity, "Role Created Successfully");
+        }
+        catch (Exception e)
+        {
+            return Result<Role>.Failure(Error.ExceptionError());
         }
     }
 

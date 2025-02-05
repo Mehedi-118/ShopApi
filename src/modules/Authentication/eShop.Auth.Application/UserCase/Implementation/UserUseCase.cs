@@ -49,6 +49,25 @@ public class UserUseCase(IUnitOfWork unitOfWork)
             ? Result<UserRegisterResponseDto>.Success(userRegisterResponseDto, result.Message)
             : Result<UserRegisterResponseDto>.Failure(result.Error);
     }
+    public async Task<Result<UserRoleDto>> CreateRoleHandler(UserRoleDto userRoleDto, CancellationToken cancellationToken)
+    {
+
+
+        var role = new Role
+        {
+            Name = userRoleDto.Name
+        };
+
+        Result<Role> result = await unitOfWork.EShopAuthRepository.CreateRole(role, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return Result<UserRoleDto>.Failure(result.Error, result.Message);
+        }
+        return result.IsSuccess
+            ? Result<UserRoleDto>.Success(userRoleDto, result.Message)
+            : Result<UserRoleDto>.Failure(result.Error);
+    }
 
     public async Task<Result<UserLoginResponseDto>> LoginHandler(UserLoginDto userLoginDto,
         CancellationToken cancellationToken)

@@ -131,4 +131,10 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
         return result;
 
     }
+
+    public async Task<Result<UserRoleDto>> CreateRole(UserRoleDto userRoleDto, CancellationToken cancellationToken)
+    {
+        Result<UserRoleDto> result =await userUseCase.CreateRoleHandler(userRoleDto, cancellationToken);
+        return !result.IsSuccess ? Result<UserRoleDto>.Failure(result.Error) : result;
+    }
 }

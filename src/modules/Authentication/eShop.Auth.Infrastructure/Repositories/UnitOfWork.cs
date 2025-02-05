@@ -20,6 +20,7 @@ public class UnitOfWork(
     AuthenticationDbContext dbContext,
     AuthenticationReadOnlyDbContext readOnlyDbContext,
     UserManager<User> userManager,
+    RoleManager<Role> rolemanager,
     IEShopAuthRepository eShopAuthRepository)
     : IUnitOfWork
 {
@@ -27,7 +28,7 @@ public class UnitOfWork(
 
 
     public IEShopAuthRepository EShopAuthRepository =>
-        _eShopAuthRepository ??= new EShopRepository(dbContext, readOnlyDbContext, userManager);
+        _eShopAuthRepository ??= new EShopRepository(dbContext, readOnlyDbContext, userManager, rolemanager);
 
 
     public async Task<Result<CommitResult>> SaveChangesAsync(CancellationToken cancellationToken,

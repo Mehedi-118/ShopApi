@@ -40,6 +40,7 @@ public class DependencyResolver : Injector
                 options.Password.RequiredLength = 6; // Customize as needed
                 options.Lockout.MaxFailedAccessAttempts = 5; // Customize as needed
             })
+            .AddRoles<Role>()
             .AddEntityFrameworkStores<AuthenticationDbContext>();
     }
 }

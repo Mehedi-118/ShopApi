@@ -9,6 +9,7 @@ namespace eShop.Auth.Domain.Interfaces;
 public interface IEShopAuthRepository
 {
     Task<Result<User>> Register(User entity, CancellationToken cancellationToken);
+    Task<Result<Role>> CreateRole(Role entity, CancellationToken cancellationToken);
     Task<Result<User>> Login(User entity, CancellationToken cancellationToken);
     Task<Result<IEnumerable<User>>> UserList(CancellationToken cancellationToken);
     Task<Result<bool>> StoreRefreashToken(RefreashToken entity, CancellationToken cancellationToken);
