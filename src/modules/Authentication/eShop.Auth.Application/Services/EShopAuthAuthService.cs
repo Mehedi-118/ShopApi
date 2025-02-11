@@ -121,7 +121,7 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
     }
 
     public async Task<Result<bool>> RevokeToken(long userId, CancellationToken cancellationToken)
-    {      
+    {
         var result = await userUseCase.RevokeToken(userId, cancellationToken);
         if (!result.IsSuccess)
         {
@@ -134,7 +134,12 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
 
     public async Task<Result<UserRoleDto>> CreateRole(UserRoleDto userRoleDto, CancellationToken cancellationToken)
     {
-        Result<UserRoleDto> result =await userUseCase.CreateRoleHandler(userRoleDto, cancellationToken);
+        Result<UserRoleDto> result = await userUseCase.CreateRoleHandler(userRoleDto, cancellationToken);
         return !result.IsSuccess ? Result<UserRoleDto>.Failure(result.Error) : result;
+    }
+    public async Task<Result<UserResponse>> GetUserInfo(long id, CancellationToken cancellationToken)
+    {
+        Result<UserResponse> result = await userUseCase.GetUserInfo(id, cancellationToken);
+        return !result.IsSuccess ? Result<UserResponse>.Failure(result.Error) : result;
     }
 }

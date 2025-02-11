@@ -8,12 +8,20 @@ using Serilog.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-
+builder.Services.AddCors(option =>
+{
+    option.AddPolicy(name: MyAllowSpecificOrigins, policy =>
+    {
+        policy.AllowAnyOrigin();
+        policy.AllowAnyHeader();
+        policy.AllowAnyMethod();
+    });
+});
 builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1",
@@ -63,7 +71,7 @@ if (app.Environment.IsDevelopment())
 app.UseSwagger();
 
 app.UseSwaggerUI();
-
+app.UseCors(MyAllowSpecificOrigins);
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseMiddleware<JwtMiddleware>();

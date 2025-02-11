@@ -186,4 +186,21 @@ public class UserUseCase(IUnitOfWork unitOfWork)
             ? Result<bool>.Failure(commitResult.Error, commitResult.Message)
             : Result<bool>.Success(true, "Refreash Token revokation successful");
     }
+
+    public async Task<Result<UserResponse>> GetUserInfo(long id, CancellationToken cancellationToken)
+    {
+        var getUserById = await unitOfWork.EShopAuthRepository.GetUserInfo(id, cancellationToken);
+        if (getUserById is not { IsSuccess: true, Data: not null })
+        {
+            return Result<UserResponse>.Failure(getUserById.Error, getUserById.Message);
+        }
+
+        return Result<UserResponse>.Success(
+            new UserResponse
+            {
+                UserId = getUserById.Data?.Id ?? 0,
+                UserName = getUserById.Data?.UserName ?? string.Empty,
+                Email = getUserById.Data?.Email ?? string.Empty,
+            }, "User Retrieved Successfully");
+    }
 }

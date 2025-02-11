@@ -15,6 +15,7 @@ public interface IEShopAuthService
     Task<Result<UserTokenResponse>> RefreashToken(UserTokenRequest userLoginDto, CancellationToken cancellationToken);
 
     Task<Result<UserRoleDto>> CreateRole(UserRoleDto userRoleDto, CancellationToken cancellationToken);
+    Task<Result<UserResponse>> GetUserInfo(long id, CancellationToken cancellationToken);
 
     Task<Result<IEnumerable<UserListDto>>> UserList(CancellationToken cancellationToken);
     Task<Result<bool>> RevokeToken(long userId, CancellationToken cancellationToken);

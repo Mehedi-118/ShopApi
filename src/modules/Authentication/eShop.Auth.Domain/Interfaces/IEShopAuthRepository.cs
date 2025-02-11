@@ -15,4 +15,5 @@ public interface IEShopAuthRepository
     Task<Result<bool>> StoreRefreashToken(RefreashToken entity, CancellationToken cancellationToken);
     Task<Result<bool>> RevokeToken(long userId, CancellationToken cancellationToken);
     Task<Result<User>> GetUserByRefreashToken(string refreshToken, CancellationToken cancellationToken);
+    Task<Result<User>> GetUserInfo(long id, CancellationToken cancellationToken);
 }

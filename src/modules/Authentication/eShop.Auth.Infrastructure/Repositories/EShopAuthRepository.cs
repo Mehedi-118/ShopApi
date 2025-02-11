@@ -164,4 +164,15 @@ public class EShopRepository(
 
         return Result<User>.Success(user, "User retrieved successfully by refreash token");
     }
+    public async Task<Result<User>> GetUserInfo(long id, CancellationToken cancellationToken)
+    {
+        User? user = await readOnlyDbContext.Users.FirstOrDefaultAsync(a => a.Id == id, cancellationToken).ConfigureAwait(false);
+
+        if (user is null or { Id: 0 })
+        {
+            return Result<User>.Failure(Error.NotFound());
+        }
+
+        return Result<User>.Success(user, "User retrieved successfully by id");
+    }
 }
