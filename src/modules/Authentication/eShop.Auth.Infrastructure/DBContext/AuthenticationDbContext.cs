@@ -15,11 +15,13 @@ public class AuthenticationDbContext(DbContextOptions<AuthenticationDbContext> o
 {
     public DbSet<RefreashToken> RefreashTokens { get; set; }
     public DbSet<PasswordPolicy> PasswordPolicySet { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
         builder.ApplyConfigurationsFromAssembly(typeof(AuthenticationDbContext).Assembly);
     }
 }

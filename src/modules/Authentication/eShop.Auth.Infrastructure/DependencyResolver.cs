@@ -8,6 +8,7 @@ using eShop.Auth.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace eShop.Auth.Infrastructure;
 
@@ -26,21 +27,23 @@ public class DependencyResolver : Injector
                 sqlServerOptions.MigrationsAssembly(typeof(IAuthInfrastructureAssemblyMarker).Assembly.FullName);
                 sqlServerOptions.EnableRetryOnFailure(15, TimeSpan.FromSeconds(30), null);
             });
-        }, 2048);
+        }, poolSize: 2048);
 
         services.AddDbContextPool<AuthenticationReadOnlyDbContext>(options =>
         {
             options.UseSqlServer(connectionString, sqlServerOptions =>
             {
+                sqlServerOptions.MigrationsAssembly(typeof(IAuthInfrastructureAssemblyMarker).Assembly.FullName);
                 sqlServerOptions.EnableRetryOnFailure(15, TimeSpan.FromSeconds(30), null);
             }).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        }, 2048);
+        }, poolSize: 2048);
         services.AddIdentityCore<User>(options =>
             {
                 options.Password.RequiredLength = 6; // Customize as needed
                 options.Lockout.MaxFailedAccessAttempts = 5; // Customize as needed
             })
             .AddRoles<Role>()
-            .AddEntityFrameworkStores<AuthenticationDbContext>();
+            .AddEntityFrameworkStores<AuthenticationDbContext>()
+            ;
     }
 }

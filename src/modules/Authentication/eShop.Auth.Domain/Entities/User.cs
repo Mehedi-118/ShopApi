@@ -19,7 +19,7 @@ public partial class User : IdentityUser<long>, ICreationMetadata, IModification
     public DateTime? LastLogin { get; set; }
     public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; }
-
+    public ICollection<UserRole> UserRoles { get; set; }
     [NotMapped] public Dictionary<string, List<string>> ValidationErrors { get; private init; }
 
     public static UserBuilder CreateBuilder() => new();
@@ -245,7 +245,7 @@ public partial class User : IdentityUser<long>, ICreationMetadata, IModification
         base.LockoutEnd = lockoutEndDate;
     }
 
-    private static (bool isValid, List<string>errors) PasswordValidator(string passwordHash)
+    private static (bool isValid, List<string> errors) PasswordValidator(string passwordHash)
     {
         var errors = new List<string>();
         if (passwordHash.Length < 8)

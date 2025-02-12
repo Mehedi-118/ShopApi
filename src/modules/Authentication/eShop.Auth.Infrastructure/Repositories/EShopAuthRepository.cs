@@ -166,7 +166,16 @@ public class EShopRepository(
     }
     public async Task<Result<User>> GetUserInfo(long id, CancellationToken cancellationToken)
     {
-        User? user = await readOnlyDbContext.Users.FirstOrDefaultAsync(a => a.Id == id, cancellationToken).ConfigureAwait(false);
+        var userWithRoles = await dbContext.Users
+                                            .Where(a => a.Id == id)
+                                            .Include(b => b.UserRoles)
+                                            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        User? user = await readOnlyDbContext.Users
+                                            .Where(a => a.Id == id)
+                                            .Include(b => b.UserRoles)
+                                            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+
 
         if (user is null or { Id: 0 })
         {

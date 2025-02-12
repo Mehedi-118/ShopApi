@@ -12,15 +12,15 @@ using eShop.Auth.Infrastructure.DBContext;
 namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
 {
     [DbContext(typeof(AuthenticationDbContext))]
-    [Migration("20241112091943_init")]
-    partial class init
+    [Migration("20250212075139_init3")]
+    partial class init3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -113,6 +113,74 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("eShop.Auth.Domain.Entities.PasswordPolicy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MinLength")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("RequireDigit")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RequireLowercase")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RequireSpecialCharacter")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RequireUppercase")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PasswordPolicy", "Authentication");
+                });
+
+            modelBuilder.Entity("eShop.Auth.Domain.Entities.RefreashToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ExpiresOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreashToken", "Authentication");
+                });
+
             modelBuilder.Entity("eShop.Auth.Domain.Entities.Role", b =>
                 {
                     b.Property<long>("Id")
@@ -134,6 +202,8 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -202,6 +272,10 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ProfilePicturePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -287,19 +361,44 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShop.Auth.Domain.Entities.UserRole", b =>
+            modelBuilder.Entity("eShop.Auth.Domain.Entities.RefreashToken", b =>
                 {
-                    b.HasOne("eShop.Auth.Domain.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("eShop.Auth.Domain.Entities.User", null)
+                    b.HasOne("eShop.Auth.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("eShop.Auth.Domain.Entities.UserRole", b =>
+                {
+                    b.HasOne("eShop.Auth.Domain.Entities.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("eShop.Auth.Domain.Entities.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("eShop.Auth.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("eShop.Auth.Domain.Entities.User", b =>
+                {
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

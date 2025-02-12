@@ -95,5 +95,17 @@ public class AuthController(IEShopAuthService eShopAuthService) : ControllerBase
         Ok<ApiResponse<UserRoleDto>> apiResponse = ApiResponseResult<UserRoleDto>.Success(response.Data, response.Message);
         return apiResponse;
     }
+    [HttpPost]
+    [AllowAnonymous]
+    [Route("user/{id}")]
+    public async
+        Task<Results<Ok<ApiResponse<UserResponse>>, JsonHttpResult<ApiResponse<UserResponse>>>>
+        User(long id, CancellationToken cancellationToken)
+    {
+        Result<UserResponse> response = await eShopAuthService.GetUserInfo(id, cancellationToken);
+        return response.IsSuccess
+            ? ApiResponseResult<UserResponse>.Success(response.Data, response.Message)
+            : ApiResponseResult<UserResponse>.Problem<UserResponse>(response.Error);
+    }
 
 }

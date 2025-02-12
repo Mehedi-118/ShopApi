@@ -12,8 +12,8 @@ using eShop.Auth.Infrastructure.DBContext;
 namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
 {
     [DbContext(typeof(AuthenticationDbContext))]
-    [Migration("20250119130456_refreashToken")]
-    partial class refreashToken
+    [Migration("20250211125756_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -203,6 +203,8 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Id");
+
                     b.HasIndex("NormalizedName")
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex")
@@ -320,7 +322,7 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles", "Authentication");
+                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
@@ -372,17 +374,31 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
 
             modelBuilder.Entity("eShop.Auth.Domain.Entities.UserRole", b =>
                 {
-                    b.HasOne("eShop.Auth.Domain.Entities.Role", null)
-                        .WithMany()
+                    b.HasOne("eShop.Auth.Domain.Entities.Role", "Role")
+                        .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("eShop.Auth.Domain.Entities.User", null)
-                        .WithMany()
+                    b.HasOne("eShop.Auth.Domain.Entities.User", "User")
+                        .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("eShop.Auth.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("eShop.Auth.Domain.Entities.User", b =>
+                {
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

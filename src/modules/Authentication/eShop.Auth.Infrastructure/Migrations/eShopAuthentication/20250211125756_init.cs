@@ -15,6 +15,24 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                 name: "Authentication");
 
             migrationBuilder.CreateTable(
+                name: "PasswordPolicy",
+                schema: "Authentication",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MinLength = table.Column<int>(type: "int", nullable: false),
+                    RequireUppercase = table.Column<bool>(type: "bit", nullable: false),
+                    RequireLowercase = table.Column<bool>(type: "bit", nullable: false),
+                    RequireDigit = table.Column<bool>(type: "bit", nullable: false),
+                    RequireSpecialCharacter = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PasswordPolicy", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 schema: "Authentication",
                 columns: table => new
@@ -37,6 +55,7 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    ProfilePicturePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
@@ -130,6 +149,32 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                 });
 
             migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    RoleId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalSchema: "Authentication",
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_Users_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "Authentication",
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
@@ -151,25 +196,26 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "RefreashToken",
                 schema: "Authentication",
                 columns: table => new
                 {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExpiresOnUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
-                    RoleId = table.Column<long>(type: "bigint", nullable: false)
+                    IsRevoked = table.Column<bool>(type: "bit", nullable: false),
+                    UpdatedBy = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => new { x.UserId, x.RoleId });
+                    table.PrimaryKey("PK_RefreashToken", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserRoles_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalSchema: "Authentication",
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserRoles_Users_UserId",
+                        name: "FK_RefreashToken_Users_UserId",
                         column: x => x.UserId,
                         principalSchema: "Authentication",
                         principalTable: "Users",
@@ -193,18 +239,29 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreashToken_UserId",
+                schema: "Authentication",
+                table: "RefreashToken",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Roles_Id",
+                schema: "Authentication",
+                table: "Roles",
+                column: "Id");
+
+            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 schema: "Authentication",
                 table: "Roles",
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_RoleId",
-                schema: "Authentication",
-                table: "UserRoles",
-                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
@@ -246,10 +303,17 @@ namespace eShop.Auth.Infrastructure.Migrations.eShopAuthentication
                 name: "AspNetUserLogins");
 
             migrationBuilder.DropTable(
+                name: "AspNetUserRoles");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "UserRoles",
+                name: "PasswordPolicy",
+                schema: "Authentication");
+
+            migrationBuilder.DropTable(
+                name: "RefreashToken",
                 schema: "Authentication");
 
             migrationBuilder.DropTable(
