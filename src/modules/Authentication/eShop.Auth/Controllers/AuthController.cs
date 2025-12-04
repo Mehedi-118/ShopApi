@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+
 using Common.Helpers;
 
 using eShop.Auth.Application.DTOs.Request;
@@ -100,9 +102,31 @@ public class AuthController(IEShopAuthService eShopAuthService) : ControllerBase
     [Route("user/{id}")]
     public async
         Task<Results<Ok<ApiResponse<UserResponse>>, JsonHttpResult<ApiResponse<UserResponse>>>>
-        User(long id, CancellationToken cancellationToken)
+        UserById(long id, CancellationToken cancellationToken)
     {
         Result<UserResponse> response = await eShopAuthService.GetUserInfo(id, cancellationToken);
+        return response.IsSuccess
+            ? ApiResponseResult<UserResponse>.Success(response.Data, response.Message)
+            : ApiResponseResult<UserResponse>.Problem<UserResponse>(response.Error);
+    }
+    [HttpPost]
+
+    [HttpGet]
+    [Route("user-details")]
+    public async
+        Task<Results<Ok<ApiResponse<UserResponse>>, JsonHttpResult<ApiResponse<UserResponse>>>>UserDetails(CancellationToken cancellationToken)
+    {
+        string token = string.Empty;
+        if (Request.Headers.TryGetValue("Authorization", out var authHeader))
+        {
+            var authHeaderValue = authHeader.FirstOrDefault();
+            if (!string.IsNullOrEmpty(authHeaderValue) && authHeaderValue.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                // Extract the token by removing the "Bearer " prefix
+                token = authHeaderValue.Substring("Bearer ".Length).Trim();
+            }
+        }
+        Result<UserResponse> response = await eShopAuthService.GetUserByToken(token, cancellationToken);
         return response.IsSuccess
             ? ApiResponseResult<UserResponse>.Success(response.Data, response.Message)
             : ApiResponseResult<UserResponse>.Problem<UserResponse>(response.Error);

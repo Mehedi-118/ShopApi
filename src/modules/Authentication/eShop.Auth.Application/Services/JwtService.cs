@@ -9,13 +9,15 @@ using eShop.Auth.Application.DTOs.Request;
 using eShop.Auth.Application.DTOs.Response;
 using eShop.Auth.Application.Helpers;
 using eShop.Auth.Application.Interfaces;
+using eShop.Auth.Domain.Entities;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace eShop.Auth.Application.Services;
 
-public class JwtService(IOptions<JwtOptions> options) : IJwtService
+public class JwtService(IOptions<JwtOptions> options, IHttpContextAccessor _httpContextAccessor) : IJwtService
 {
     private readonly JwtOptions _jwtOptions = options.Value;
 
@@ -126,6 +128,18 @@ public class JwtService(IOptions<JwtOptions> options) : IJwtService
         var refreashToken = Convert.ToBase64String(randomNumber);
 
         return Task.FromResult(refreashToken ?? string.Empty);
+    }
+    public Task<Result<long>> GetUserIdByToken(string accessToken,
+        CancellationToken cancellationToken)
+    {
+        var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst("sid")?.Value;
+
+        if (long.TryParse(userIdClaim, out var userId))
+        {
+            return Task.FromResult(Result<long>.Success(userId));
+        }
+
+        return Task.FromResult(Result<long>.Failure(Error.ExceptionError("User id not retrieved from token")));
     }
 
 

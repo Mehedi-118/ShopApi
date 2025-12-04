@@ -142,4 +142,15 @@ public class EShopAuthAuthService(IUserUseCase userUseCase, IJwtService jwtServi
         Result<UserResponse> result = await userUseCase.GetUserInfo(id, cancellationToken);
         return !result.IsSuccess ? Result<UserResponse>.Failure(result.Error) : result;
     }
+    public async Task<Result<UserResponse>> GetUserByToken(string token, CancellationToken cancellationToken)
+    {
+        var userIdResponse = await jwtService.GetUserIdByToken(token, cancellationToken);
+        if (userIdResponse.IsSuccess && userIdResponse.Data == 0)
+        {
+            Result<UserResponse>.Failure(userIdResponse.Error);
+        }
+
+        Result<UserResponse> result = await userUseCase.GetUserInfo(userIdResponse.Data, cancellationToken);
+        return !result.IsSuccess ? Result<UserResponse>.Failure(result.Error) : result;
+    }
 }

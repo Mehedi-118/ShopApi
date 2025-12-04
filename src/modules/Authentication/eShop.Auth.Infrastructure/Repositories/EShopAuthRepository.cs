@@ -166,10 +166,6 @@ public class EShopRepository(
     }
     public async Task<Result<User>> GetUserInfo(long id, CancellationToken cancellationToken)
     {
-        var userWithRoles = await dbContext.Users
-                                            .Where(a => a.Id == id)
-                                            .Include(b => b.UserRoles)
-                                            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         User? user = await readOnlyDbContext.Users
                                             .Where(a => a.Id == id)
                                             .Include(b => b.UserRoles)
@@ -183,5 +179,23 @@ public class EShopRepository(
         }
 
         return Result<User>.Success(user, "User retrieved successfully by id");
+    }
+    public async Task<Result<User>> GetUserByToken(string token, CancellationToken cancellationToken)
+    {
+        var tokenResult = await readOnlyDbContext.UserTokens.FirstOrDefaultAsync(a => a.Value == token);
+
+        User? user = await readOnlyDbContext.Users
+                              .Where(a => a.Id == tokenResult.UserId)
+                              .Include(b => b.UserRoles)
+                              .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+
+
+        if (user is null or { Id: 0 })
+        {
+            return Result<User>.Failure(Error.NotFound());
+        }
+
+        return Result<User>.Success(user, "User retrieved successfully by token");
     }
 }

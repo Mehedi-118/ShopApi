@@ -59,6 +59,8 @@ var logger = new LoggerConfiguration()
     .ReadFrom
     .Configuration(builder.Configuration).CreateLogger();
 builder.Logging.AddSerilog(logger, dispose: true);
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandlerMiddleware>();
 builder.Services.AddProblemDetails();
 var app = builder.Build();

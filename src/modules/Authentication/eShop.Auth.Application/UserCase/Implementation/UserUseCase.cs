@@ -203,4 +203,20 @@ public class UserUseCase(IUnitOfWork unitOfWork)
                 Email = getUserById.Data?.Email ?? string.Empty,
             }, "User Retrieved Successfully");
     }
+    public async Task<Result<UserResponse>> GetUserByToken(string token, CancellationToken cancellationToken)
+    {
+        var getUserByToken = await unitOfWork.EShopAuthRepository.GetUserByToken(token, cancellationToken);
+        if (getUserByToken is not { IsSuccess: true, Data: not null })
+        {
+            return Result<UserResponse>.Failure(getUserByToken.Error, getUserByToken.Message);
+        }
+
+        return Result<UserResponse>.Success(
+            new UserResponse
+            {
+                UserId = getUserByToken.Data?.Id ?? 0,
+                UserName = getUserByToken.Data?.UserName ?? string.Empty,
+                Email = getUserByToken.Data?.Email ?? string.Empty,
+            }, "User Retrieved Successfully");
+    }
 }

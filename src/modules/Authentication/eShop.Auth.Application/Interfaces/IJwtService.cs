@@ -11,6 +11,9 @@ public interface IJwtService
 
     Task<Result<UserTokenGeneratorDto>> GetPrincipalFromExpiredToken(string accessToken,
         CancellationToken cancellationToken);
+    
+    Task<Result<long>> GetUserIdByToken(string accessToken,
+        CancellationToken cancellationToken);
 
     Task<string> GenerateRefreashToken();
 }

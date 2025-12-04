@@ -11,6 +11,7 @@ public interface IUserUseCase
     Task<Result<UserRegisterResponseDto>> RegisterHandler(UserRegisterDto userRegisterDto,CancellationToken cancellationToken);
     Task<Result<UserRoleDto>> CreateRoleHandler(UserRoleDto userRoleDto, CancellationToken cancellationToken);
     Task<Result<UserResponse>> GetUserInfo(long id, CancellationToken cancellationToken);
+    Task<Result<UserResponse>> GetUserByToken(string token, CancellationToken cancellationToken);
 
     Task<Result<UserLoginResponseDto>> LoginHandler(UserLoginDto userLoginDto, CancellationToken cancellationToken);
 
